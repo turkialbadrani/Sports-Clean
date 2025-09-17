@@ -1,0 +1,25 @@
+workflows:
+  default-workflow:
+    name: Default Workflow
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      android:
+        ndk: 27.0.12077973
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+        - $HOME/Library/Caches/CocoaPods
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build Android
+        script: flutter build appbundle --release
+      - name: Build iOS
+        script: flutter build ipa --release
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/*.apk
+      - build/ios/ipa/*.ipa
