@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "253711866652",
+    "project_id": "sports-f638e",
+    "storage_bucket": "sports-f638e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253711866652:android:173940b7e9f2daf196b8d9",
+        "android_client_info": {
+          "package_name": "com.example.today_smart2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "253711866652-i3ofsgqg9rpigdvovpj5g6pe7u5ml6sc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.today_smart2",
+            "certificate_hash": "46ef0040ce768cb33a077d8054997ed153529849"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAH6wBX2zCLWexjQvFtMizSsFUEtgTz00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

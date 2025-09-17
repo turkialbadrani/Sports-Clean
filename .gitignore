@@ -1,0 +1,18 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Build outputs
+build/
+android/app/build/
+ios/Pods/
+macos/Pods/
+
+# IDE
+.idea/
+*.iml
+
+# Env & Zips
+*.zip
+.env

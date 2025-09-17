@@ -1,0 +1,27 @@
+{
+  "theme": {
+    "background": "assets/images/backgrounds/bg.jpg",
+    "primaryColor": "#1A000000",
+
+    "secondaryColor": "#9575CD",
+    "textColor": "#FFFFFF",
+    "timeColor": "#FFEB3B"
+  },
+  "date": "الخميس 28 أغسطس 2025",
+  "leagues": [
+    {
+      "name": "دوري روشن السعودي | الجولة 1",
+      "matches": [
+        {
+          "home": "الهلال",
+          "away": "الاتحاد",
+          "homeLogo": "assets/logos/s.png",
+          "awayLogo": "assets/logos/d.png",
+          "time": "9:00 م",
+          "channel": "SSC",
+          "channelLogo": "assets/logos/ssc.png"
+        }
+      ]
+    }
+  ]
+}
