@@ -51,7 +51,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icon/app_icon.png
-    - .env
     - assets/localization/teams_ar.json
     - assets/localization/players_ar.json
     - assets/localization/leagues_ar.json
