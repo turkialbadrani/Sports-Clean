@@ -1,0 +1,48 @@
+[35m.gitignore[m[36m:[m[32m18[m[36m:[m[1;31m.env[m
+Binary file [35mbfg-1.15.0.jar[m matches
+[35mios/.gitignore[m[36m:[m[32m26[m[36m:[mFlutter/flutter_export[1;31m_env[mironment.sh
+[35mlib/di/providers_setup_example.dart[m[36m:[m[32m4[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/di/providers_setup_example.dart[m[36m:[m[32m17[m[36m:[m        Provider<ApiClient>(create: (_) => ApiClient(apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY']!)),
+[35mlib/features/fixtures/controllers/fixtures_controller.dart[m[36m:[m[32m1[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/features/fixtures/controllers/fixtures_controller.dart[m[36m:[m[32m31[m[36m:[m      apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY'] ?? '',
+[35mlib/features/fixtures/services/fixtures_repository.dart[m[36m:[m[32m3[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/features/fixtures/services/fixtures_repository.dart[m[36m:[m[32m24[m[36m:[m  })  : api = FixturesApi(apiKey: apiKey ?? (do[1;31mtenv[m[1;31m.env[m['API_KEY'] ?? '')),
+[35mlib/features/fixtures/services/fixtures_repository.dart[m[36m:[m[32m27[m[36m:[m            apiKey: apiKey ?? (do[1;31mtenv[m[1;31m.env[m['API_KEY'] ?? ''),
+[35mlib/features/leagues/services/leagues_repository.dart[m[36m:[m[32m3[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/features/leagues/services/leagues_repository.dart[m[36m:[m[32m21[m[36m:[m              apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY'] ?? '',
+[35mlib/features/leagues/services/leagues_repository.dart[m[36m:[m[32m22[m[36m:[m              timezone: do[1;31mtenv[m[1;31m.env[m['TIMEZONE'] ?? 'Asia/Riyadh',
+[35mlib/features/leagues/services/leagues_repository.dart[m[36m:[m[32m23[m[36m:[m              leagues: _parseCsvInts(do[1;31mtenv[m[1;31m.env[m['LEAGUES']),
+[35mlib/features/leagues/services/leagues_repository.dart[m[36m:[m[32m53[m[36m:[m  /// دمج (assets + provider + [1;31m.env[m)
+[35mlib/features/leagues/services/leagues_repository.dart[m[36m:[m[32m54[m[36m:[m  static Future<Set<int>> _resolvePreferredIds(List<int>[1;31m env[mWhitelist) async {
+[35mlib/features/leagues/services/leagues_repository.dart[m[36m:[m[32m58[m[36m:[m    final fromEnv =[1;31m env[mWhitelist.toSet();
+[35mlib/features/localization/export_leagues.dart[m[36m:[m[32m4[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/features/localization/export_leagues.dart[m[36m:[m[32m11[m[36m:[m  final api = FixturesApi(apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY'] ?? '');
+[35mlib/features/players/players_page.dart[m[36m:[m[32m2[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/features/players/players_page.dart[m[36m:[m[32m40[m[36m:[m      apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY']!,
+[35mlib/features/players/players_page.dart[m[36m:[m[32m41[m[36m:[m      timezone: do[1;31mtenv[m[1;31m.env[m['TZ']!,
+[35mlib/features/players/top_scorers_page.dart[m[36m:[m[32m5[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/features/players/top_scorers_page.dart[m[36m:[m[32m31[m[36m:[m        apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY'] ?? '',
+[35mlib/main.dart[m[36m:[m[32m35[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mlib/main.dart[m[36m:[m[32m67[m[36m:[m  await do[1;31mtenv[m.load(fileName: "[1;31m.env[m");
+[35mlib/main.dart[m[36m:[m[32m106[m[36m:[m              apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY']!,
+[35mlib/main.dart[m[36m:[m[32m115[m[36m:[m              apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY']!,
+[35mlib/main.dart[m[36m:[m[32m129[m[36m:[m              apiKey: do[1;31mtenv[m[1;31m.env[m['API_KEY']!,
+[35mlinux/flutter/CMakeLists.txt[m[36m:[m[32m79[m[36m:[m  COMMAND ${CMAKE_COMMAND} -E[1;31m env[m
+[35mlinux/runner/my_application.cc[m[36m:[m[32m121[m[36m:[m  // like GTK and desktop[1;31m env[mironments map this running application to its
+[35mpresentation/pages/today_smart_page.dart[m[36m:[m[32m3[m[36m:[mimport 'package:flutter_do[1;31mtenv[m/flutter_do[1;31mtenv[m.dart';
+[35mpresentation/pages/today_smart_page.dart[m[36m:[m[32m39[m[36m:[m    final[1;31m env[mApi     = do[1;31mtenv[m[1;31m.env[m['API_KEY'] ?? '';
+[35mpresentation/pages/today_smart_page.dart[m[36m:[m[32m40[m[36m:[m    final[1;31m env[mTZ      = do[1;31mtenv[m[1;31m.env[m['TZ'] ?? 'Asia/Riyadh';
+[35mpresentation/pages/today_smart_page.dart[m[36m:[m[32m41[m[36m:[m    final[1;31m env[mLeagues = do[1;31mtenv[m[1;31m.env[m['LEAGUES'] ?? '';
+[35mpresentation/pages/today_smart_page.dart[m[36m:[m[32m43[m[36m:[m    final leagues =[1;31m env[mLeagues.isEmpty
+[35mpresentation/pages/today_smart_page.dart[m[36m:[m[32m45[m[36m:[m        :[1;31m env[mLeagues.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+[35mpresentation/pages/today_smart_page.dart[m[36m:[m[32m47[m[36m:[m    final api = ApiClient(apiKey:[1;31m env[mApi, timezone:[1;31m env[mTZ, leagues: leagues);
+[35mpubspec.lock[m[36m:[m[32m281[m[36m:[m  flutter_do[1;31mtenv[m:
+[35mpubspec.lock[m[36m:[m[32m284[m[36m:[m      name: flutter_do[1;31mtenv[m
+[35mpubspec.yaml[m[36m:[m[32m29[m[36m:[m  flutter_do[1;31mtenv[m: ^5.2.1
+[35mpubspec.yaml[m[36m:[m[32m54[m[36m:[m    - [1;31m.env[m
+[35mtools/extract_player_ids.dart[m[36m:[m[32m15[m[36m:[m    stderr.writeln("❌ لم يتم العثور على API_KEY أو API_FOOTBALL_KEY في [1;31m.env[m");
+[35mtools/extract_player_ids.dart[m[36m:[m[32m57[m[36m:[m/// يقرأ API key من ملف [1;31m.env[m (يدعم API_KEY و API_FOOTBALL_KEY)
+[35mtools/extract_player_ids.dart[m[36m:[m[32m59[m[36m:[m  final[1;31m env[mFile = File('[1;31m.env[m');
+[35mtools/extract_player_ids.dart[m[36m:[m[32m60[m[36m:[m  if ([1;31m!env[mFile.existsSync()) return null;
+[35mtools/extract_player_ids.dart[m[36m:[m[32m62[m[36m:[m  final lines = await[1;31m env[mFile.readAsLines();
+[35mwindows/flutter/CMakeLists.txt[m[36m:[m[32m97[m[36m:[m  COMMAND ${CMAKE_COMMAND} -E[1;31m env[m
