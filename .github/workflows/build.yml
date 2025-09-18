@@ -23,13 +23,10 @@ jobs:
       - name: Get Flutter packages
         run: flutter pub get
 
-      # --- هذا هو القسم الذي تم تصحيح الخطأ الإملائي فيه ---
-      - name: Patch Xcode and Install iOS dependencies
+      - name: Install iOS dependencies
         run: |
-          sudo gem install cocoapods-xcconfig-patch
           cd ios
           pod install
-          patch_xcconfig
 
       - name: Build iOS App (Debug for Simulator)
         run: flutter build ios --simulator --no-codesign
