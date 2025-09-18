@@ -1,8 +1,12 @@
 workflows:
-  debug-build:
-    name: Debug Build
+  android-ios-build:
+    name: Android & iOS Build
     instance_type: mac_mini_m2
     max_build_duration: 60
+    integrations: {} # تعطيل التكاملات التلقائية
+    triggering: {} # تعطيل المشغلات التلقائية
+    cache: # تعطيل الكاش
+      cache_paths: []
     environment:
       flutter: stable
       xcode: latest
@@ -10,7 +14,7 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter packages pub get
-      - name: Clean and Install iOS dependencies (CocoaPods)
+      - name: Clean and Install iOS dependencies
         script: |
           set -e
           cd ios
@@ -18,9 +22,9 @@ workflows:
           pod cache clean --all
           pod repo update
           pod install
-      - name: Build Flutter App (Android)
+      - name: Build Android APK
         script: flutter build apk --debug
-      - name: Build Flutter App (iOS)
+      - name: Build iOS App
         script: flutter build ios --debug --no-codesigning
     artifacts:
       - build/app/outputs/apk/debug/*.apk
@@ -28,4 +32,4 @@ workflows:
     publishing:
       email:
         recipients:
-          - your_email@example.com # <-- تأكد من صحة إيميلك هنا
+          - your_email@example.com # <-- تأكد من إيميلك
