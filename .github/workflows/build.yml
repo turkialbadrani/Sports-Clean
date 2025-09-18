@@ -16,20 +16,20 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          # --- هذا هو التعديل الصحيح والمطلوب ---
-          flutter-version: '3.22.2' 
+          flutter-version: '3.22.2'
           channel: 'stable'
           cache: true
 
       - name: Get Flutter packages
         run: flutter pub get
 
-      - name: Clean and Install iOS dependencies
+      # --- هذا هو القسم الذي تم تعديله ---
+      - name: Patch Xcode and Install iOS dependencies
         run: |
+          sudo gem install cocoapods-xcode-patch
           cd ios
-          rm -rf Pods Podfile.lock
-          pod repo update
           pod install
+          patch_xcode
 
       - name: Build iOS App (Debug for Simulator)
         run: flutter build ios --simulator --no-codesign
