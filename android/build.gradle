@@ -1,17 +1,15 @@
 buildscript {
-    // حدد إصدار Kotlin هنا
-    ext.kotlin_version = '1.9.23' 
+    // العودة إلى إصدار Kotlin أقدم ومستقر
+    ext.kotlin_version = '1.7.22' 
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        // تحديث classpath الخاص بـ Gradle
-        classpath 'com.android.tools.build:gradle:8.2.0' 
-        // تحديث classpath الخاص بـ Kotlin
+        // العودة إلى إصدار Gradle أقدم ومستقر جدًا
+        classpath 'com.android.tools.build:gradle:7.4.2' 
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        // تحديث classpath الخاص بـ Google Services
         classpath 'com.google.gms:google-services:4.4.2'
     }
 }

@@ -1,20 +1,18 @@
 // تطبيق الإضافات بالطريقة التقليدية
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'dev.flutter.flutter-gradle-plugin'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 apply plugin: 'com.google.gms.google-services'
 
 android {
     // استخدام namespace بالطريقة الصحيحة
     namespace "com.turki.sports"
-    // استخدام compileSdk المتوافق
-    compileSdkVersion 34
+    // استخدام compileSdk المتوافق مع الإصدارات القديمة
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        // 👇 تفعيل الميزة المطلوبة
-        isCoreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -29,7 +27,7 @@ android {
         applicationId "com.turki.sports"
         // تثبيت minSdkVersion لضمان التوافق مع Firebase
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         // تفعيل Multidex وهو ضروري جدًا
@@ -51,6 +49,4 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // إضافة دعم Multidex
     implementation 'androidx.multidex:multidex:2.0.1'
-    // 👇 إضافة الاعتمادية المطلوبة للميزة
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"
 }
