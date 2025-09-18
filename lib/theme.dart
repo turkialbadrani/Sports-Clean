@@ -13,7 +13,7 @@ class AppTheme {
   );
 
   static ThemeData dark = ThemeData.dark().copyWith(
-    cardTheme: CardThemeData(
+    cardTheme: CardTheme(
       elevation: 1,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
