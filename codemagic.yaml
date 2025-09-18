@@ -36,7 +36,4 @@ workflows:
         - ~/.pub-cache
         - ios/Pods
 
-    publishing:
-      app_store_connect:
-        submit_to_testflight: true
-        # مفاتيح App Store Connect تظل مضافة من لوحة Codemagic (Team settings)
+  
