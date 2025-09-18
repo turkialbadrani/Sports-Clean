@@ -32,7 +32,7 @@ jobs:
           pod install
 
       - name: Build iOS App (Debug for Simulator)
-        run: flutter build ios --debug --no-codesigning
+        run: flutter build ios --simulator --no-codesign
 
       - name: Build Android APK (Debug)
         run: flutter build apk --debug
