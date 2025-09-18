@@ -1,59 +1,29 @@
 workflows:
   debug-build:
-    name: Debug & Release Build
+    name: Debug Build
+    instance_type: mac_mini_m2
     max_build_duration: 60
     environment:
       flutter: stable
       xcode: latest
-      groups:
-        - development
-      cache:
-        cache_paths:
-          - $FLUTTER_ROOT/.pub-cache
-          - ios/Pods
-          - ~/.gradle/caches
-          - ~/.gradle/wrapper
-
+      cocoapods: default
     scripts:
-      - name: Clean and install dependencies
+      - name: Get Flutter packages
+        script: flutter packages pub get
+      - name: Install iOS dependencies (CocoaPods)
         script: |
-          flutter clean
-          flutter pub get
-
-      - name: Fix CocoaPods
-        script: |
+          set -e # Stop on first error
           cd ios
-          rm -rf Podfile.lock Pods
-          pod deintegrate
-          pod repo update --silent
-          pod install --repo-update
-          echo "📦 ---- Firebase pods in Podfile.lock ----"
-          grep -i "firebase" Podfile.lock || true
-          grep -i "firestore" Podfile.lock || true
-          echo "📄 ---- Full Podfile.lock ----"
-          cat Podfile.lock | head -n 200
-          echo "📄 ---- GeneratedPluginRegistrant.m ----"
-          cat Runner/GeneratedPluginRegistrant.m | head -n 100
-          cd ..
-
-      # 👇 Android Release APK
-      - name: Build Android Release
-        script: flutter build apk --release
-
-      # 👇 iOS Debug (Simulator فقط)
-      - name: Build iOS Debug (Simulator)
-        script: flutter build ios --debug --no-codesign
-
-      # 👇 iOS Release (IPA للتوزيع/TestFlight لاحقاً)
-      - name: Build iOS Release IPA
-        script: flutter build ipa --release --no-codesign
-
+          pod repo update
+          pod install
+      - name: Build Flutter App (Android)
+        script: flutter build apk --debug
+      - name: Build Flutter App (iOS)
+        script: flutter build ios --debug --no-codesigning
     artifacts:
-      # Android APK
-      - build/app/outputs/flutter-apk/app-release.apk
-
-      # iOS Simulator app
+      - build/app/outputs/apk/debug/*.apk
       - build/ios/iphonesimulator/*.app
-
-      # iOS Release IPA
-      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - your_email@example.com # <-- غيّر هذا إلى إيميلك إذا لم تكن قد فعلت
