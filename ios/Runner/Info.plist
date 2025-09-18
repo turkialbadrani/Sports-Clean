@@ -8,11 +8,8 @@
 	<string>Today Smart</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
-
-	<!-- ✅ عدلنا هنا -->
 	<key>CFBundleIdentifier</key>
-	<string>com.turki.sports</string>
-
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
