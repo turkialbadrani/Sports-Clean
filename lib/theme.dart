@@ -5,7 +5,7 @@ class AppTheme {
     primarySwatch: Colors.blue,
     scaffoldBackgroundColor: const Color(0xFFF7F7F7),
     appBarTheme: const AppBarTheme(centerTitle: true),
-    cardTheme: CardThemeData(
+    cardTheme: CardTheme( // <--- تم التصحيح هنا
       elevation: 1,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
