@@ -8,34 +8,33 @@ workflows:
       groups:
         - development
 
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - ios/Pods
+        - ios/.symlinks
+        - ios/Flutter/Flutter.framework
+        - ios/Flutter/Flutter.podspec
+
     scripts:
       - name: Clean and install dependencies
         script: |
           flutter clean
           flutter pub get
           cd ios
-          pod repo update --silent
           pod install --repo-update
           cd ..
 
-      # 👇 Android Release APK
       - name: Build Android Release
         script: flutter build apk --release
 
-      # 👇 iOS Debug (Simulator فقط)
       - name: Build iOS Debug (Simulator)
         script: flutter build ios --debug --no-codesign
 
-      # 👇 iOS Release (IPA للتوزيع اليدوي/TestFlight لاحقاً)
       - name: Build iOS Release IPA
         script: flutter build ipa --release --no-codesign
 
     artifacts:
-      # Android APK
       - build/app/outputs/flutter-apk/app-release.apk
-
-      # iOS Simulator app
       - build/ios/iphonesimulator/*.app
-
-      # iOS Release IPA
       - build/ios/ipa/*.ipa
