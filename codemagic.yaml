@@ -27,8 +27,13 @@ workflows:
           pod deintegrate
           pod repo update --silent
           pod install --repo-update
-          echo "📦 Installed Pods:"
-          cat Podfile.lock | grep -E "cloud_firestore|firebase"
+          echo "📦 ---- Firebase pods in Podfile.lock ----"
+          grep -i "firebase" Podfile.lock || true
+          grep -i "firestore" Podfile.lock || true
+          echo "📄 ---- Full Podfile.lock ----"
+          cat Podfile.lock | head -n 200
+          echo "📄 ---- GeneratedPluginRegistrant.m ----"
+          cat Runner/GeneratedPluginRegistrant.m | head -n 100
           cd ..
 
       # 👇 Android Release APK
