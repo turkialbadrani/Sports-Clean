@@ -1,6 +1,6 @@
 workflows:
-  debug-build:
-    name: Debug & Release Build
+  ios-release:
+    name: iOS Release Build
     max_build_duration: 60
     environment:
       flutter: stable
@@ -18,31 +18,19 @@ workflows:
       - name: Clean and install dependencies
         script: |
           flutter clean
-          flutter pub get   # ✅ لازم يشتغل أول عشان يولد ملفات Flutter
+          flutter pub get
           cd ios
           rm -rf Pods Podfile.lock
-          pod repo update --silent
+          pod deintegrate
+          pod setup
+          pod repo update
           pod install
           cd ..
 
-      # 👇 Android Release APK
-      - name: Build Android Release
-        script: flutter build apk --release
-
-      # 👇 iOS Debug (Simulator فقط)
-      - name: Build iOS Debug (Simulator)
-        script: flutter build ios --debug --no-codesign
-
-      # 👇 iOS Release (IPA للتوزيع/TestFlight لاحقاً)
+      # 👇 Build iOS Release IPA فقط
       - name: Build iOS Release IPA
         script: flutter build ipa --release --no-codesign
 
     artifacts:
-      # Android APK
-      - build/app/outputs/flutter-apk/app-release.apk
-
-      # iOS Simulator app
-      - build/ios/iphonesimulator/*.app
-
       # iOS Release IPA
       - build/ios/ipa/*.ipa
