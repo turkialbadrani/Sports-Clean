@@ -10,10 +10,12 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter packages pub get
-      - name: Install iOS dependencies (CocoaPods)
+      - name: Clean and Install iOS dependencies (CocoaPods)
         script: |
-          set -e # Stop on first error
+          set -e
           cd ios
+          rm -rf Pods Podfile.lock
+          pod cache clean --all
           pod repo update
           pod install
       - name: Build Flutter App (Android)
@@ -26,4 +28,4 @@ workflows:
     publishing:
       email:
         recipients:
-          - your_email@example.com # <-- غيّر هذا إلى إيميلك إذا لم تكن قد فعلت
+          - your_email@example.com # <-- تأكد من صحة إيميلك هنا
