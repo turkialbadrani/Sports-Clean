@@ -1,54 +1,53 @@
-plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") // Firebase
-}
+// تطبيق الإضافات بالطريقة التقليدية
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'dev.flutter.flutter-gradle-plugin'
+apply plugin: 'com.google.gms.google-services'
 
 android {
-    namespace = "com.example.today_smart2"
-    compileSdk = 36
-
-    ndkVersion = "27.0.12077973"
+    // استخدام namespace بالطريقة الصحيحة
+    namespace "com.turki.sports"
+    // استخدام compileSdk المتوافق
+    compileSdkVersion 34
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {
-        applicationId = "com.example.today_smart2"
-        minSdk = flutter.minSdkVersion  // عادة 23
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        applicationId "com.turki.sports"
+        // تثبيت minSdkVersion لضمان التوافق مع Firebase
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+        // تفعيل Multidex وهو ضروري جدًا
+        multiDexEnabled true
     }
 
     buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("debug")
+        release {
+            signingConfig signingConfigs.debug
         }
     }
 }
 
 flutter {
-    source = "../.."
+    source '../..'
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-
-    // Firebase BOM
-    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
-
-    // Firebase services
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-messaging")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // إضافة دعم Multidex
+    implementation 'androidx.multidex:multidex:2.0.1'
+    // لا حاجة لتعريف حزم Firebase هنا، فلاتر يقوم بذلك تلقائيًا
 }
