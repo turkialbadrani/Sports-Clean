@@ -11,15 +11,16 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+
   provider: ^6.1.2
   shimmer: ^3.0.0
 
-  # ✅ Firebase (متوافقة مع iOS 13)
+  # ✅ FlutterFire (متوافق مع iOS 13 و GoogleSignIn 7.x عبر plugin 6.x)
   firebase_core: ^2.27.0
   firebase_messaging: ^14.7.10
   cloud_firestore: ^4.15.9
   firebase_auth: ^4.17.4
-  google_sign_in: ^6.2.1
+  google_sign_in: 6.2.1   # ← مهم تثبيتها على 6.x لتفادي تعارض AppAuth/GoogleUtilities
 
   # Core
   http: ^1.2.2
@@ -45,7 +46,6 @@ dev_dependencies:
   flutter_lints: ^2.0.3
   flutter_launcher_icons: ^0.13.1
 
-# --- القسم المضاف لحل مشكلة التعارض ---
 dependency_overrides:
   intl: 0.19.0
 
