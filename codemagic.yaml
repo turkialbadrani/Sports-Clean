@@ -27,6 +27,8 @@ workflows:
           pod deintegrate
           pod repo update --silent
           pod install --repo-update
+          echo "📦 Installed Pods:"
+          cat Podfile.lock | grep -E "cloud_firestore|firebase"
           cd ..
 
       # 👇 Android Release APK
