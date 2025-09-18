@@ -11,9 +11,6 @@ workflows:
         cache_paths:
           - $FLUTTER_ROOT/.pub-cache
           - ios/Pods
-          - ios/.symlinks
-          - ios/Flutter/Flutter.framework
-          - ios/Flutter/Flutter.podspec
           - ~/.gradle/caches
           - ~/.gradle/wrapper
 
@@ -21,10 +18,11 @@ workflows:
       - name: Clean and install dependencies
         script: |
           flutter clean
-          flutter pub get
+          flutter pub get   # ✅ لازم يشتغل أول عشان يولد ملفات Flutter
           cd ios
+          rm -rf Pods Podfile.lock
           pod repo update --silent
-          pod install --repo-update
+          pod install
           cd ..
 
       # 👇 Android Release APK
