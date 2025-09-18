@@ -23,20 +23,16 @@ jobs:
       - name: Get Flutter packages
         run: flutter pub get
 
-      # --- هذا هو القسم الذي تم تعديله ---
-      - name: Prepare iOS project and install dependencies
-        run: |
-          # هذا الأمر سيقوم بإنشاء Podfile وكل الإعدادات اللازمة
-          flutter build ios --simulator --no-codesign 
-          # الآن يمكننا تشغيل pod install بأمان (كخطوة تأكيدية)
-          cd ios
-          pod install
-
+      # بناء الأندرويد أولاً
       - name: Build Android APK (Debug)
         run: flutter build apk --debug
 
+      # بناء iOS (هذا الأمر يقوم بكل شيء: pod install والبناء)
+      - name: Build iOS App (Debug for Simulator)
+        run: flutter build ios --simulator --no-codesign
+
+      # رفع الملفات التي تم بناؤها بنجاح
       - name: Upload iOS Artifact
-        # المسار الصحيح بعد البناء
         uses: actions/upload-artifact@v4
         with:
           name: ios-app
