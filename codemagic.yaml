@@ -1,12 +1,13 @@
 workflows:
   debug-build:
-    name: Debug Build
+    name: Debug & Release Build
     max_build_duration: 60
     environment:
       flutter: stable
       xcode: latest
       groups:
         - development
+
     scripts:
       - name: Clean and install dependencies
         script: |
@@ -16,10 +17,25 @@ workflows:
           pod repo update
           pod install
           cd ..
+
+      # 👇 Android Debug APK
       - name: Build Android Debug
         script: flutter build apk --debug
-      - name: Build iOS Debug
+
+      # 👇 iOS Debug (Simulator فقط)
+      - name: Build iOS Debug (Simulator)
         script: flutter build ios --debug --no-codesign
+
+      # 👇 iOS Release (IPA للتوزيع اليدوي/TestFlight لاحقاً)
+      - name: Build iOS Release IPA
+        script: flutter build ipa --release --no-codesign
+
     artifacts:
+      # Android APK
       - build/app/outputs/flutter-apk/app-debug.apk
+
+      # iOS Simulator app
       - build/ios/iphonesimulator/*.app
+
+      # iOS Release IPA
+      - build/ios/ipa/*.ipa
