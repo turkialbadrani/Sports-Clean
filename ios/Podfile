@@ -1,12 +1,18 @@
 ﻿platform :ios, '13.0'
 
+# اهم سطرين: يشحن podhelper.rb ويهيّئ بيئة فلتر
+require File.expand_path(File.join('..', 'Flutter', 'podhelper.rb'), __FILE__)
+flutter_ios_podfile_setup
+
 target 'Runner' do
+  # نستخدم frameworks بشكل static (متوافق مع FlutterFire)
   use_frameworks! :linkage => :static
+
+  # هذا هو النداء الصحيح
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-  end
+  # ملاحظة: الدالة تستقبل installer نفسه
+  flutter_additional_ios_build_settings(installer)
 end
