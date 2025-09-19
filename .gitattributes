@@ -1,9 +1,1 @@
-﻿# ثبّت نهايات السطر على LF لملفات iOS والسكربتات
-ios/Podfile text eol=lf
-ios/*.plist text eol=lf
-*.sh text eol=lf
-*.yaml text eol=lf
-*.yml text eol=lf
-
-# الخيار العام: خلّ كل النصوص تتعامل كنص وتتحول لـ LF
-* text=auto eol=lf
+﻿# المحتوى فوق
