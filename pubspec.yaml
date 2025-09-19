@@ -15,36 +15,36 @@ dependencies:
   provider: ^6.1.2
   shimmer: ^3.0.0
 
-  # ✅ FlutterFire (متوافق مع iOS 13 و GoogleSignIn 7.x عبر plugin 6.x)
-  firebase_core: ^2.27.0
-  firebase_messaging: ^14.7.10
-  cloud_firestore: ^4.15.9
-  firebase_auth: ^4.17.4
-  google_sign_in: 6.2.1   # ← مهم تثبيتها على 6.x لتفادي تعارض AppAuth/GoogleUtilities
+  # ✅ FlutterFire (سلاسل جديدة تحل تعارض CocoaPods)
+  firebase_core: ^4.1.0
+  firebase_auth: ^6.0.2
+  cloud_firestore: ^6.0.0
+  firebase_messaging: ^16.0.1
+  google_sign_in: ^7.2.0
 
   # Core
   http: ^1.2.2
   flutter_svg: ^2.0.10+1
   cached_network_image: ^3.3.1
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^6.0.0
 
   # Local Storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
   # Local Notifications
-  flutter_local_notifications: ^17.2.4
+  flutter_local_notifications: ^19.4.2
 
   # من V2
   auto_size_text: ^3.0.0
-  share_plus: ^7.2.2
+  share_plus: ^12.0.0
   path_provider: ^2.1.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.3
-  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 dependency_overrides:
   intl: 0.19.0
