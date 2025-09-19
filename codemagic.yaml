@@ -7,9 +7,8 @@ workflows:
       flutter: stable
       xcode: 16.4
       cocoapods: default
-      # عدّل اسم المجموعة لو عندك testers
       vars:
-        BETA_GROUP: "External Testers"
+        BETA_GROUP: "External Testers"   # غيّرها إذا عندك اسم مجموعة مختلف
 
     scripts:
       - name: Pre-build (clean + pods)
@@ -27,7 +26,6 @@ workflows:
       - name: Build IPA (auto build-number)
         script: |
           set -e
-          # خذ رقم من بيئة Codemagic لو متوفر، وإلا 1
           BUILD_NO=${BUILD_NUMBER:-${CM_BUILD_ID:-1}}
           flutter build ipa --release --no-tree-shake-icons --build-number=$BUILD_NO
 
@@ -42,18 +40,10 @@ workflows:
 
     publishing:
       app_store_connect:
-        # استخدم متغيرات البيئة اللي أضفتها في Codemagic:
-        # APP_STORE_CONNECT_KEY_ID / APP_STORE_CONNECT_ISSUER_ID / APP_STORE_CONNECT_API_KEY
+        # استخدم متغيرات البيئة اللي ضفتها في Codemagic (Environment variables)
         key_id: $APP_STORE_CONNECT_KEY_ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         api_key: $APP_STORE_CONNECT_API_KEY
         submit_to_testflight: true
-        # إرسال للمجموعة (اختياري)
         beta_groups:
           - $BETA_GROUP
-        # ملاحظات الإصدار للـ TestFlight (تظهر للمختبرين)
-        changelog: |
-          First TestFlight build for Today Smart (com.turki.sports).
-          - Firebase setup
-          - Google Sign-In
-          - Notifications groundwork
