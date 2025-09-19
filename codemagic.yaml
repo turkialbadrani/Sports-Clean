@@ -1,16 +1,18 @@
 workflows:
   ios_release:
-    name: iOS Release
+    name: iOS Release to TestFlight
     instance_type: mac_mini_m1
 
     environment:
       flutter: stable
       xcode: 16.4
       cocoapods: default
+      # عدّل اسم المجموعة لو عندك testers
+      vars:
+        BETA_GROUP: "External Testers"
 
     scripts:
-      # ← هذا هو الـ Pre-build script
-      - name: Reinstall CocoaPods (pre-build)
+      - name: Pre-build (clean + pods)
         script: |
           set -e
           flutter --version
@@ -22,10 +24,12 @@ workflows:
           pod install --repo-update
           cd ..
 
-      - name: Build IPA
+      - name: Build IPA (auto build-number)
         script: |
           set -e
-          flutter build ipa --release --no-tree-shake-icons
+          # خذ رقم من بيئة Codemagic لو متوفر، وإلا 1
+          BUILD_NO=${BUILD_NUMBER:-${CM_BUILD_ID:-1}}
+          flutter build ipa --release --no-tree-shake-icons --build-number=$BUILD_NO
 
     artifacts:
       - build/ios/ipa/*.ipa
@@ -36,4 +40,20 @@ workflows:
         - ~/.pub-cache
         - ios/Pods
 
-  
+    publishing:
+      app_store_connect:
+        # استخدم متغيرات البيئة اللي أضفتها في Codemagic:
+        # APP_STORE_CONNECT_KEY_ID / APP_STORE_CONNECT_ISSUER_ID / APP_STORE_CONNECT_API_KEY
+        key_id: $APP_STORE_CONNECT_KEY_ID
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        api_key: $APP_STORE_CONNECT_API_KEY
+        submit_to_testflight: true
+        # إرسال للمجموعة (اختياري)
+        beta_groups:
+          - $BETA_GROUP
+        # ملاحظات الإصدار للـ TestFlight (تظهر للمختبرين)
+        changelog: |
+          First TestFlight build for Today Smart (com.turki.sports).
+          - Firebase setup
+          - Google Sign-In
+          - Notifications groundwork
