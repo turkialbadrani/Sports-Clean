@@ -1,4 +1,4 @@
-﻿platform :ios, '13.0'
+﻿platform :ios, '14.0'  # رفعت الحد الأدنى من 13.0 إلى 14.0
 
 # حمّل podhelper.rb من مجلد Flutter SDK مباشرة
 flutter_root = ENV['FLUTTER_ROOT']
@@ -19,5 +19,13 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  # إعدادات Flutter الإضافية
   flutter_additional_ios_build_settings(installer)
+
+  # ثبّت الـ deployment target = 14.0 على كل بود
+  installer.pods_project.targets.each do |t|
+    t.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+    end
+  end
 end
