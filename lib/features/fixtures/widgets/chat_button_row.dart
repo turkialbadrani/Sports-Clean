@@ -5,6 +5,7 @@ import 'package:today_smart/features/chat/services/auth_service.dart';
 import 'package:today_smart/features/polls/widgets/vote_bottom_sheet.dart';
 import '../match_details_page.dart';
 import '../../fixtures/models/fixture.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatButtonRow extends StatelessWidget {
   final FixtureModel fixture;
@@ -13,44 +14,66 @@ class ChatButtonRow extends StatelessWidget {
   Future<void> _enterChat(BuildContext context) async {
     final auth = AuthService();
 
-    // 1️⃣ تسجيل الدخول إذا ما فيه مستخدم
-    var user = auth.currentUser;
-    if (user == null) {
-      user = await auth.signInWithGoogle();
-      if (user == null) return; // المستخدم لغى
+    try {
+      // 1) المستخدم الحالي
+      User? user = auth.currentUser;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ تم تسجيل الدخول بنجاح")),
-      );
-    }
+      // 2) تسجيل الدخول إذا ما فيه مستخدم
+      if (user == null) {
+        final cred = await auth.signInWithGoogle(); // قد تكون UserCredential? أو User?
+        if (cred is UserCredential) {
+          user = cred.user;
+        } else if (cred is User) {
+          user = cred;
+        }
 
-    // 2️⃣ التحقق من الاسم
-    var name = auth.getDisplayName();
-    if (name == null) {
-      name = await Navigator.push(
+        if (user == null) return; // المستخدم لغى
+
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ تم تسجيل الدخول بنجاح")),
+        );
+      }
+
+      // 3) التحقق/تعيين الاسم المعروض
+      var name = auth.getDisplayName();
+      if (name == null || name.trim().isEmpty) {
+        final pickedName = await Navigator.push<String?>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProfileSetupPage(authService: auth),
+          ),
+        );
+
+        if (pickedName == null || pickedName.trim().isEmpty) return;
+
+        await auth.saveDisplayName(pickedName.trim());
+        name = pickedName.trim();
+
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("👤 تم اختيار اسمك: $name")),
+        );
+      }
+
+      // 4) الدخول إلى الشات
+      if (!context.mounted) return;
+      Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ProfileSetupPage(authService: auth),
+          builder: (_) => MatchChatPage(
+            matchId: fixture.id,
+            homeTeam: fixture.home.name,
+            awayTeam: fixture.away.name,
+          ),
         ),
       );
-      if (name == null) return;
-
+    } catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("👤 تم اختيار اسمك: $name")),
+        SnackBar(content: Text("⚠️ صار خطأ: $e")),
       );
     }
-
-    // 3️⃣ الدخول للشات
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MatchChatPage(
-          matchId: fixture.id,
-          homeTeam: fixture.home.name,
-          awayTeam: fixture.away.name,
-        ),
-      ),
-    );
   }
 
   @override
@@ -100,7 +123,7 @@ class ChatButtonRow extends StatelessWidget {
                 matchId: fixture.id,
                 homeTeam: fixture.home.name,
                 awayTeam: fixture.away.name,
-                isFinished: fixture.isFinished, // ✅ نمرر حالة المباراة
+                isFinished: fixture.isFinished,
               ),
             );
           },
