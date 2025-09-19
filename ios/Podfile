@@ -1,18 +1,23 @@
 ﻿platform :ios, '13.0'
 
-# اهم سطرين: يشحن podhelper.rb ويهيّئ بيئة فلتر
-require File.expand_path(File.join('..', 'Flutter', 'podhelper.rb'), __FILE__)
+# حمّل podhelper.rb من مجلد Flutter SDK مباشرة
+flutter_root = ENV['FLUTTER_ROOT']
+raise 'FLUTTER_ROOT is not set' if flutter_root.nil? || flutter_root.empty?
+
+begin
+  require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper.rb'), flutter_root)
+rescue LoadError
+  # بعض إصدارات Flutter تسميه بدون .rb
+  require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+end
+
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # نستخدم frameworks بشكل static (متوافق مع FlutterFire)
   use_frameworks! :linkage => :static
-
-  # هذا هو النداء الصحيح
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
-  # ملاحظة: الدالة تستقبل installer نفسه
   flutter_additional_ios_build_settings(installer)
 end
