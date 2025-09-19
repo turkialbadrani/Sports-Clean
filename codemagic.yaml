@@ -7,18 +7,25 @@ workflows:
       flutter: stable
       xcode: 16.4
       cocoapods: default
+      groups:
+        - asc  # اسم مجموعة env vars اللي حطّيت فيها مفاتيح App Store Connect
       vars:
-        BETA_GROUP: "External Testers"   # غيّرها إذا عندك اسم مجموعة مختلف
+        BETA_GROUP: "External Testers"
 
     scripts:
-      - name: Pre-build (clean + pods)
+      - name: Flutter clean
         script: |
           set -e
           flutter --version
           flutter clean
           flutter pub get
-          rm -rf ios/Pods ios/Podfile.lock ios/.symlinks ios/Flutter/Flutter.podspec
+
+      - name: CocoaPods install (no aggressive cleanup)
+        script: |
+          set -e
           cd ios
+          # لا نحذف ios/Flutter/** عشان ما نفقد podhelper.rb
+          rm -rf Pods Podfile.lock
           pod repo update
           pod install --repo-update
           cd ..
@@ -40,7 +47,6 @@ workflows:
 
     publishing:
       app_store_connect:
-        # استخدم متغيرات البيئة اللي ضفتها في Codemagic (Environment variables)
         key_id: $APP_STORE_CONNECT_KEY_ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         api_key: $APP_STORE_CONNECT_API_KEY
