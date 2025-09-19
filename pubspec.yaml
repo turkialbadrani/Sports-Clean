@@ -16,11 +16,12 @@ dependencies:
   shimmer: ^3.0.0
 
   # ✅ FlutterFire (سلاسل جديدة تحل تعارض CocoaPods)
-  firebase_core: ^4.1.0
+    firebase_core: ^4.1.0
   firebase_auth: ^6.0.2
   cloud_firestore: ^6.0.0
   firebase_messaging: ^16.0.1
   google_sign_in: ^7.2.0
+
 
   # Core
   http: ^1.2.2
