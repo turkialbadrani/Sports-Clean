@@ -1,7 +1,7 @@
 name: today_smart
 description: Today Smart fixtures viewer (Arabic) for SPL, EPL, LaLiga with robust fallbacks.
 publish_to: "none"
-version: 1.0.0+1
+ "version: $($args[0].Groups[1].Value)+$([int]$args[0].Groups[2].Value + 1)" 
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

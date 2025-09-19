@@ -1,6 +1,6 @@
-﻿platform :ios, '14.0'  # <-- رفعناها
+﻿platform :ios, '15.0'  # <-- رفعناها لـ 15.0
 
-# حمّل podhelper.rb من مجلد Flutter SDK مباشرة
+# حمّل podhelper.rb من FLUTTER_ROOT
 flutter_root = ENV['FLUTTER_ROOT']
 raise 'FLUTTER_ROOT is not set' if flutter_root.nil? || flutter_root.empty?
 
@@ -19,11 +19,10 @@ end
 
 post_install do |installer|
   flutter_additional_ios_build_settings(installer)
-
-  # ثبّت الـ deployment target = 14.0 على كل البودز
+  # ثبّت 15.0 على كل البودز/التارجتس
   installer.pods_project.targets.each do |t|
     t.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     end
   end
 end
