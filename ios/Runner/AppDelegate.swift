@@ -1,7 +1,6 @@
+// ios/Runner/AppDelegate.swift
 import UIKit
 import Flutter
-import FirebaseCore           // ✅ بدل import Firebase
-import UserNotifications      // (اختياري) إن كنت تستخدم FCM
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -9,15 +8,8 @@ import UserNotifications      // (اختياري) إن كنت تستخدم FCM
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-
-    FirebaseApp.configure()                 // ✅ لازم قبل استخدام Firebase
+    // لا تستدعي FirebaseApp.configure() هنا — صرنا نهيّئه من Dart عبر firebase_options.dart
     GeneratedPluginRegistrant.register(with: self)
-
-    // (اختياري) إن كنت تستخدم FCM وتريد عرض الإشعارات في foreground
-    if #available(iOS 10.0, *) {
-      UNUserNotificationCenter.current().delegate = self
-    }
-
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

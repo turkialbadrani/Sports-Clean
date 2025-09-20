@@ -43,6 +43,7 @@ import 'features/localization/localization_ar.dart';
 import 'features/localization/ar_names.dart';
 
 // ===== FCM background handler =====
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 await Firebase.initializeApp(
   options: DefaultFirebaseOptions.currentPlatform,
