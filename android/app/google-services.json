@@ -24,12 +24,53 @@
       ],
       "api_key": [
         {
+          "current_key": "AIzaSyAIPzvvwXxOyY-wTxEpB5y-_YuE_5L_rsQ"
+        },
+        {
           "current_key": "AIzaSyDAH6wBX2zCLWexjQvFtMizSsFUEtgTz00"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "253711866652-vu42mea97vmrokfj8ju88pu6qui7mc68.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.turki.sports"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253711866652:android:8c6329f48df6e07996b8d9",
+        "android_client_info": {
+          "package_name": "com.turki.sports"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIPzvvwXxOyY-wTxEpB5y-_YuE_5L_rsQ"
+        },
+        {
+          "current_key": "AIzaSyDAH6wBX2zCLWexjQvFtMizSsFUEtgTz00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "253711866652-vu42mea97vmrokfj8ju88pu6qui7mc68.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.turki.sports"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,18 +1,69 @@
-// تطبيق الإضافات بالطريقة التقليدية
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-apply plugin: 'com.google.gms.google-services'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'dev.flutter.flutter-gradle-plugin'
+    id 'com.google.gms.google-services'  // فعّله لاحقًا إذا أضفت google-services.json
+}
+
+import java.util.Properties
+
+// تحميل بيانات keystore مرّة واحدة
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties') // يُقرأ من مجلد android
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { stream -> keystoreProperties.load(stream) }
+} else {
+    println("WARNING: key.properties not found. Release signing will fail.")
+}
 
 android {
-    // استخدام namespace بالطريقة الصحيحة
     namespace "com.turki.sports"
-    // استخدام compileSdk المتوافق مع الإصدارات القديمة
-    compileSdkVersion 33
+    compileSdkVersion 36
+
+    defaultConfig {
+        applicationId "com.turki.sports"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        release {
+            if (keystoreProperties.containsKey('storeFile')
+                    && keystoreProperties.containsKey('storePassword')
+                    && keystoreProperties.containsKey('keyAlias')
+                    && keystoreProperties.containsKey('keyPassword')) {
+
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            } else {
+                println("ERROR: Missing one or more signing keys in key.properties.")
+            }
+        }
+        // debug الافتراضي من أندرويد؛ ما نحتاج تعريف خاص
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            // لو بتفعّل لاحقًا:
+            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // الافتراضي
+        }
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true  // مطلوب لـ flutter_local_notifications
     }
 
     kotlinOptions {
@@ -22,23 +73,6 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-
-    defaultConfig {
-        applicationId "com.turki.sports"
-        // تثبيت minSdkVersion لضمان التوافق مع Firebase
-        minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 1
-        versionName "1.0"
-        // تفعيل Multidex وهو ضروري جدًا
-        multiDexEnabled true
-    }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.debug
-        }
-    }
 }
 
 flutter {
@@ -46,7 +80,6 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    // إضافة دعم Multidex
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
     implementation 'androidx.multidex:multidex:2.0.1'
 }
