@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
@@ -42,31 +45,45 @@ import 'core/json_to_hive/players_repository.dart' as local_players;
 import 'features/localization/localization_ar.dart';
 import 'features/localization/ar_names.dart';
 
-// ===== FCM background handler =====
+/// ===== FCM background handler (لازم top-level) =====
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  // سجّل أي استثناءات غير متوقعة أثناء الخلفية
+  try {
+    // TODO: تعامل مع الرسالة إن احتجت
+  } catch (e, st) {
+    await FirebaseCrashlytics.instance.recordError(e, st, reason: 'BG message handler');
+  }
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ---- Safe bootstrap with error screen ----
-  FlutterError.onError = (details) {
-    FlutterError.presentError(details);
-    // يمكن ترسل Crashlytics هنا إذا فعلته لاحقًا
-  };
-
-  runApp(const _BootApp()); // شاشة انتظار بسيطة
+  // شاشة انتظار
+  runApp(const _BootApp());
 
   try {
     // Firebase
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    /// ===== Crashlytics: تفعيل وجمع كل الأخطاء =====
+    // التقط أخطاء Flutter غير الممسوكة:
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    // التقط أخطاء Dart غير الممسوكة (خارج إطار Flutter)
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    // تأكد أن Crashlytics مفعّل (ممكن تطفّيه على debug فقط إن بغيت)
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
 
     // Hive
     await Hive.initFlutter();
@@ -76,7 +93,7 @@ await Firebase.initializeApp(
       Hive.openBox('players_cache'),
     ]);
 
-    // .env (اختياري — ما يطيح لو مفقود)
+    // .env (اختياري)
     await dotenv.load(fileName: ".env", isOptional: true);
     final apiKey = dotenv.env['API_KEY'];
     final hasApiKey = (apiKey != null && apiKey.trim().isNotEmpty);
@@ -92,8 +109,10 @@ await Firebase.initializeApp(
       await local_leagues.LeaguesRepository().loadLeagues();
       await ClubsRepository().loadClubs();
       await local_players.PlayersRepository().loadPlayers();
-    } catch (e) {
+    } catch (e, st) {
       debugPrint('Local JSON preload failed: $e');
+      await FirebaseCrashlytics.instance
+          .recordError(e, st, reason: 'Local JSON preload failed');
     }
 
     // Settings
@@ -106,7 +125,7 @@ await Firebase.initializeApp(
       ...preferredLeagueIdsFromAssets(),
     }.toList();
 
-    // ApiClient (لو ما فيه API_KEY نخليه يفشل بلطف لاحقًا بدل كراش)
+    // ApiClient
     ApiClient makeClient() => ApiClient(
           apiKey: hasApiKey ? apiKey! : '',
           timezone: "Asia/Riyadh",
@@ -169,11 +188,14 @@ await Firebase.initializeApp(
       String? token = await FirebaseMessaging.instance.getToken();
       if (token != null) await box.put('fcm_token', token);
       FirebaseMessaging.instance.onTokenRefresh.listen((t) async => box.put('fcm_token', t));
-    } catch (e) {
+    } catch (e, st) {
       debugPrint('FCM token handling failed: $e');
+      await FirebaseCrashlytics.instance
+          .recordError(e, st, reason: 'FCM token handling failed');
     }
   } catch (e, st) {
-    // لو صار أي فشل أثناء التمهيد — نعرض شاشة خطأ مفهومة
+    // لو صار أي فشل أثناء التمهيد — نعرض شاشة خطأ + نسجّله
+    await FirebaseCrashlytics.instance.recordError(e, st, fatal: true, reason: 'BOOT ERROR');
     runApp(_BootErrorApp(error: e.toString()));
     debugPrint('BOOT ERROR: $e\n$st');
   }

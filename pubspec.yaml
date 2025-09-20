@@ -1,7 +1,7 @@
 name: today_smart
 description: Today Smart fixtures viewer (Arabic) for SPL, EPL, LaLiga with robust fallbacks.
 publish_to: "none"
-version: 1.0.0+5
+version: 1.0.0+6
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -21,6 +21,7 @@ dependencies:
   cloud_firestore: ^6.0.0
   firebase_messaging: ^16.0.1
   google_sign_in: 6.2.1
+  firebase_crashlytics: ^4.0.3
 
   # Core
   http: ^1.2.2
