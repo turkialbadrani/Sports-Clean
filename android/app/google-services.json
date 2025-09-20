@@ -51,7 +51,16 @@
           "package_name": "com.turki.sports"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "253711866652-eea5m96scb8u1ae0aq7flujr832elfpk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.turki.sports",
+            "certificate_hash": "873559052250bbfb543c7a6a876cd32a02aebe53"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAIPzvvwXxOyY-wTxEpB5y-_YuE_5L_rsQ"

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -43,7 +44,9 @@ import 'features/localization/ar_names.dart';
 
 // ===== FCM background handler =====
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
 }
 
 Future<void> main() async {
@@ -60,7 +63,9 @@ Future<void> main() async {
   try {
     // Firebase
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await Firebase.initializeApp();
+await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
 
     // Hive
     await Hive.initFlutter();
