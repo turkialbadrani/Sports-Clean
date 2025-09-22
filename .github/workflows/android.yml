@@ -1,0 +1,115 @@
+name: Android Build (Flutter) — Simple
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter 3.24.3
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.3"
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Flutter Pub Get
+        run: flutter pub get
+
+      # (اختياري) كتابة google-services.json من السيكرت
+      - name: Google Services (optional)
+        run: |
+          if [ -n "${ANDROID_GOOGLE_SERVICES_JSON}" ]; then
+            echo "${ANDROID_GOOGLE_SERVICES_JSON}" | base64 -d > android/app/google-services.json
+            echo "✅ google-services.json written."
+          else
+            echo "ℹ️ ANDROID_GOOGLE_SERVICES_JSON not set (optional)."
+          fi
+        env:
+          ANDROID_GOOGLE_SERVICES_JSON: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON }}
+
+      # إعداد ملف keystore و key.properties
+      - name: Signing files
+        run: |
+          echo "${KEYSTORE_BASE64}" | base64 -d > android/my-release-key.jks
+          cat > android/key.properties << 'EOF'
+          storePassword=${KEYSTORE_PASSWORD}
+          keyPassword=${KEY_PASSWORD}
+          keyAlias=${KEY_ALIAS}
+          storeFile=../my-release-key.jks
+          EOF
+          echo "✅ key.properties & keystore ready."
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+
+      # قبول تراخيص SDK وتنزيل الأساسيات (احتياطي)
+      - name: Accept SDK licenses (robust)
+        run: |
+          SDKMGR="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ -x "$SDKMGR" ]; then
+            yes | "$SDKMGR" --licenses
+            "$SDKMGR" "platforms;android-36" "build-tools;35.0.0" || true
+          else
+            echo "⚠️ sdkmanager not found, continuing."
+          fi
+
+      # تهيئة Gradle للـ CI (يخفّض ضجيج التحذير)
+      - name: Gradle tweaks for CI
+        run: |
+          echo "org.gradle.vfs.watch=false" >> android/gradle.properties || true
+
+      # التحقق من الألياس داخل الـ keystore
+      - name: Verify keystore credentials
+        run: |
+          set -e
+          echo "→ Listing aliases:"
+          keytool -list -keystore android/my-release-key.jks \
+            -storetype PKCS12 -storepass "${KEYSTORE_PASSWORD}" | sed -n '1,80p'
+          echo "→ Checking alias '${KEY_ALIAS}'..."
+          keytool -list -v -keystore android/my-release-key.jks \
+            -storetype PKCS12 -storepass "${KEYSTORE_PASSWORD}" -alias "${KEY_ALIAS}" >/dev/null
+          echo "✅ Keystore OK."
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+
+      - name: Flutter doctor (diagnostics)
+        run: flutter doctor -v
+
+      # بناء AAB — تم تعطيل الـ shrinker لأنه سبب الفشل
+      - name: Build AAB (release, verbose)
+        run: |
+          flutter -v build appbundle --release --no-shrink --build-number $GITHUB_RUN_NUMBER \
+            --dart-define=API_KEY=${API_KEY} \
+            --dart-define=THEME=${THEME} \
+            --dart-define=TZ=${TZ}
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          THEME: ${{ secrets.THEME }}
+          TZ: ${{ secrets.TZ }}
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: appbundle-release
+          path: build/app/outputs/bundle/release/*.aab
+          if-no-files-found: error

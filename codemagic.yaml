@@ -1,0 +1,55 @@
+workflows:
+  ios_release:
+    name: iOS Release to TestFlight
+    instance_type: mac_mini_m1
+
+    environment:
+      flutter: stable
+      xcode: 16.4
+      cocoapods: default
+      groups:
+        - asc  # اسم مجموعة env vars اللي حطّيت فيها مفاتيح App Store Connect
+      vars:
+        BETA_GROUP: "External Testers"
+
+    scripts:
+      - name: Flutter clean
+        script: |
+          set -e
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: CocoaPods install (no aggressive cleanup)
+        script: |
+          set -e
+          cd ios
+          # لا نحذف ios/Flutter/** عشان ما نفقد podhelper.rb
+          rm -rf Pods Podfile.lock
+          pod repo update
+          pod install --repo-update
+          cd ..
+
+      - name: Build IPA (auto build-number)
+        script: |
+          set -e
+          BUILD_NO=${BUILD_NUMBER:-${CM_BUILD_ID:-1}}
+          flutter build ipa --release --no-tree-shake-icons --build-number=$BUILD_NO
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/archive/*.xcarchive
+
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+        - ios/Pods
+
+    publishing:
+      app_store_connect:
+        key_id: $APP_STORE_CONNECT_KEY_ID
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        api_key: $APP_STORE_CONNECT_API_KEY
+        submit_to_testflight: true
+        beta_groups:
+          - $BETA_GROUP

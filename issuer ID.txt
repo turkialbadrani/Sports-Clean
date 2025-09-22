@@ -1,0 +1,22 @@
+issuer ID:
+
+1099993e-cbfd-4b26-a31e-97597c2df5e4
+
+key ID:
+
+MPT97K6RDS
+
+private key (file .p8):
+
+-----BEGIN PRIVATE KEY-----
+MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgsB7vOkLLfAF8My6X
+iBd3GDtEMAatCGC0t7JKmDJTO+egCgYIKoZIzj0DAQehRANCAATsV3dki5fGKkcc
+zkPtMt+Oh1kq2gVGJXFgjPC3st5fTXyeBQB7aUCaZ/HWTEjTW+dEx8Y2Kuw3uqLD
+KmhzzUF2
+-----END PRIVATE KEY-----
+
+
+
+Generating 2,048 bit RSA key pair and self-signed certificate (SHA256withRSA) with a validity of 10,000 days
+        for: CN=Turki Alharbi, OU=Turki, O=Turki, L=Riyad, ST=Riyad, C=SA
+[Storing my-release-key.jks]

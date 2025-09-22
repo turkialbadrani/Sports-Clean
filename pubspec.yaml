@@ -1,0 +1,70 @@
+name: today_smart
+description: Today Smart fixtures viewer (Arabic) for SPL, EPL, LaLiga with robust fallbacks.
+publish_to: "none"
+
+# ✅ النسخة تتحكم فيها من هنا فقط
+version: 1.0.1+18   # عدّل الرقم هنا مع كل إصدار جديد
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  provider: ^6.1.2
+  shimmer: ^3.0.0
+
+  # ✅ Firebase (إصدارات حديثة)
+  firebase_core: ^4.1.0
+  firebase_messaging: ^16.0.1
+  cloud_firestore: ^6.0.1
+  firebase_auth: ^6.0.2
+  google_sign_in: ^6.2.1
+  firebase_crashlytics: ^5.0.1
+
+  # Core
+  http: ^1.2.2
+  intl: ^0.20.2          # ✅ متوافقة مع flutter_localizations
+  flutter_svg: ^2.0.10+1
+  cached_network_image: ^3.3.1
+
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Local Notifications
+  flutter_local_notifications: ^19.4.2
+
+  # إضافات
+  auto_size_text: ^3.0.0
+  share_plus: ^7.2.2
+  path_provider: ^2.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icon/app_icon.png
+    - assets/localization/teams_ar.json
+    - assets/localization/players_ar.json
+    - assets/localization/leagues_ar.json
+    - assets/card_data.json
+    - assets/images/backgrounds/
+    - assets/logos/
+    - assets/localization/preferred_leagues.json
+    - assets/localization/countries_ar.json
+    - assets/localization/leagues_extended.json
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"

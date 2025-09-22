@@ -1,0 +1,90 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'dev.flutter.flutter-gradle-plugin'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+}
+
+import java.util.Properties
+
+def keystoreProps = new Properties()
+def keystoreFile = rootProject.file('key.properties')
+if (keystoreFile.exists()) {
+    keystoreFile.withInputStream { stream -> keystoreProps.load(stream) }
+}
+
+android {
+    namespace "com.turki.sports"
+    compileSdkVersion 36
+
+    defaultConfig {
+        applicationId "com.turki.sports"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
+
+        // ✅ ما يطيح لو ما لقى القيم
+        versionCode project.hasProperty("flutterVersionCode") ? flutterVersionCode.toInteger() : 1
+        versionName project.hasProperty("flutterVersionName") ? flutterVersionName : "1.0"
+
+        multiDexEnabled true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    signingConfigs {
+        release {
+            def envStorePass = System.getenv("KEYSTORE_PASSWORD")
+            def envKeyPass   = System.getenv("KEY_PASSWORD")
+            def envAlias     = System.getenv("KEY_ALIAS")
+
+            if (envStorePass != null && envKeyPass != null && envAlias != null) {
+                storeFile     file("../my-release-key.jks")
+                storePassword envStorePass
+                keyAlias      envAlias
+                keyPassword   envKeyPass
+            } else if (
+                keystoreProps.containsKey('storeFile')     &&
+                keystoreProps.containsKey('storePassword') &&
+                keystoreProps.containsKey('keyAlias')      &&
+                keystoreProps.containsKey('keyPassword')
+            ) {
+                storeFile     file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias      keystoreProps['keyAlias']
+                keyPassword   keystoreProps['keyPassword']
+            } else {
+                println("⚠️  Signing config missing (no ENV and no valid key.properties).")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+        }
+        debug { }
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    implementation 'androidx.multidex:multidex:2.0.1'
+}

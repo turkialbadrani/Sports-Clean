@@ -1,0 +1,81 @@
+# ======================
+# Flutter & Build
+# ======================
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# ======================
+# IDE / Editors
+# ======================
+.idea/
+.vscode/
+*.iml
+
+# ======================
+# iOS
+# ======================
+ios/Pods/
+ios/Podfile.lock
+ios/Runner/GoogleService-Info.plist
+ios/Flutter/Flutter.framework
+ios/Flutter/App.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/flutter_assets/
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Flutter.podspec
+ios/Runner/GeneratedPluginRegistrant.*
+**/DerivedData/
+**/.symlinks/
+xcuserdata
+*.mode1v3
+*.mode2v3
+*.pbxuser
+*.perspectivev3
+*.moved-aside
+*.xcuserstate
+!default.mode1v3
+!default.mode2v3
+!default.pbxuser
+!default.perspectivev3
+
+# ======================
+# Android
+# ======================
+android/.gradle/
+android/app/build/
+android/key.properties
+android/app/google-services.json
+**/*.keystore
+**/*.jks
+**/intermediates/
+**/merged_native_libs/
+**/zip-cache/
+.android/
+
+# ======================
+# Secrets
+# ======================
+.env
+
+# ======================
+# Releases (local only)
+# ======================
+release_android/
+
+# ======================
+# System / Misc
+# ======================
+**/.DS_Store
+Thumbs.db
+.sconsign.dblite
+.tags*
+**/.vagrant/
+**/.generated/
+profile
+ServiceDefinitions.json
