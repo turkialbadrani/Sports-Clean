@@ -1,5 +1,2 @@
-<<<<<<< HEAD
-=======
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
->>>>>>> d1738d616fd2dca5b24241dbf830ad4565cc7e79
 #include "Generated.xcconfig"

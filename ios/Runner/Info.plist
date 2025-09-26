@@ -2,87 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-<<<<<<< HEAD
-  <key>CFBundleDevelopmentRegion</key>
-  <string>$(DEVELOPMENT_LANGUAGE)</string>
-  <key>CFBundleDisplayName</key>
-  <string>Today Smart</string>
-  <key>CFBundleExecutable</key>
-  <string>$(EXECUTABLE_NAME)</string>
-
-  <key>CFBundleIdentifier</key>
-  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-
-  <key>CFBundleInfoDictionaryVersion</key>
-  <string>6.0</string>
-  <key>CFBundleName</key>
-  <string>today_smart</string>
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-  <key>CFBundleShortVersionString</key>
-  <string>$(FLUTTER_BUILD_NAME)</string>
-  <key>CFBundleSignature</key>
-  <string>????</string>
-  <key>CFBundleVersion</key>
-  <string>$(FLUTTER_BUILD_NUMBER)</string>
-  <key>LSRequiresIPhoneOS</key>
-  <true/>
-
-  <!-- استخدم شاشة الإطلاق فقط (لا يوجد Main.storyboard) -->
-  <key>UILaunchStoryboardName</key>
-  <string>LaunchScreen</string>
-
-  <key>UISupportedInterfaceOrientations</key>
-  <array>
-    <string>UIInterfaceOrientationPortrait</string>
-    <string>UIInterfaceOrientationLandscapeLeft</string>
-    <string>UIInterfaceOrientationLandscapeRight</string>
-  </array>
-  <key>UISupportedInterfaceOrientations~ipad</key>
-  <array>
-    <string>UIInterfaceOrientationPortrait</string>
-    <string>UIInterfaceOrientationPortraitUpsideDown</string>
-    <string>UIInterfaceOrientationLandscapeLeft</string>
-    <string>UIInterfaceOrientationLandscapeRight</string>
-  </array>
-
-  <key>CADisableMinimumFrameDurationOnPhone</key>
-  <true/>
-  <key>UIApplicationSupportsIndirectInputEvents</key>
-  <true/>
-
-  <!-- Google Sign-In URL Scheme -->
-  <key>CFBundleURLTypes</key>
-  <array>
-    <dict>
-      <key>CFBundleURLSchemes</key>
-      <array>
-        <string>com.googleusercontent.apps.253711866652-vu42mea97vmrokfj8ju88pu6qui7mc68</string>
-      </array>
-    </dict>
-  </array>
-
-  <!-- للسماح بالتحقق من مخططات Google -->
-  <key>LSApplicationQueriesSchemes</key>
-  <array>
-    <string>google</string>
-    <string>com.googleusercontent.apps.253711866652-vu42mea97vmrokfj8ju88pu6qui7mc68</string>
-  </array>
-
-  <!-- (اختياري لكن مفيد) إشعارات الخلفية لـ FCM -->
-  <key>UIBackgroundModes</key>
-  <array>
-    <string>remote-notification</string>
-  </array>
-
-  <!-- (اختياري) تثبيت إجابة التشفير -->
-  <key>ITSAppUsesNonExemptEncryption</key>
-  <false/>
-=======
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Sports Clean</string>
+	<string>Today Smart</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -90,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>sports_clean</string>
+	<string>today_smart</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -122,6 +45,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
->>>>>>> d1738d616fd2dca5b24241dbf830ad4565cc7e79
 </dict>
 </plist>
