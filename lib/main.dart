@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // ← جديد
 import 'firebase_options.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
@@ -45,6 +46,9 @@ import 'core/json_to_hive/players_repository.dart' as local_players;
 // Localization
 import 'features/localization/localization_ar.dart';
 import 'features/localization/ar_names.dart';
+
+// Google Sign-In Service (جديد)
+import 'services/google_auth_service.dart';
 
 /// ===== FCM background handler =====
 @pragma('vm:entry-point')
@@ -228,6 +232,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
 
+    // إذا ما فيه API_KEY نلتزم بسكرينك القديمة
+    if (!hasApiKey) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: _NoApiKeyScreen(),
+      );
+    }
+
+    // إذا فيه API_KEY نضيف بوابة المصادقة
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Today Smart',
@@ -240,7 +253,67 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('ar', '')],
-      home: hasApiKey ? const HomePage() : const _NoApiKeyScreen(),
+      home: const AuthGate(child: HomePage()),
+    );
+  }
+}
+
+/// بوابة مصادقة: إذا المستخدم مسجل يدخل على الواجهة، وإلا يطلع زر Google
+class AuthGate extends StatelessWidget {
+  final Widget child;
+  const AuthGate({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        if (snap.hasData) {
+          return child;
+        }
+        return const SignInScreen();
+      },
+    );
+  }
+}
+
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
+  bool _loading = false;
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _loading = true);
+    try {
+      await GoogleAuthService.signInWithGoogle();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('فشل تسجيل الدخول: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: _loading
+            ? const CircularProgressIndicator()
+            : ElevatedButton.icon(
+                onPressed: _handleGoogleSignIn,
+                icon: const Icon(Icons.login),
+                label: const Text('تسجيل الدخول بواسطة Google'),
+              ),
+      ),
     );
   }
 }

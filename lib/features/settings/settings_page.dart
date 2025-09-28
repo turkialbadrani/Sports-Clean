@@ -1,11 +1,16 @@
-
 // lib/features/settings/settings_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
+
 import 'settings_provider.dart';
 import 'widgets/favorite_selector.dart';
 import 'package:today_smart/core/json_to_hive/hive_boxes.dart';
+
+// جديد: بروفايل المستخدم + Auth
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:today_smart/services/user_profile_service.dart';
+import 'package:today_smart/services/google_auth_service.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -34,12 +39,62 @@ class SettingsPage extends StatelessWidget {
     final teamsMap = _mapFromBox(clubsBox);
     final playersMap = _mapFromBox(playersBox);
 
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("الإعدادات"),
       ),
       body: ListView(
         children: [
+          // 👤 الحساب (عرض/تعديل الاسم)
+          if (user != null)
+            StreamBuilder<String?>(
+              stream: UserProfileService.displayNameStream(user.uid),
+              builder: (context, snap) {
+                final displayName =
+                    (snap.data ?? user.displayName ?? user.email ?? '').toString();
+                return ListTile(
+                  leading: user.photoURL != null
+                      ? CircleAvatar(backgroundImage: NetworkImage(user.photoURL!))
+                      : const CircleAvatar(child: Icon(Icons.person)),
+                  title: Text(displayName.isEmpty ? 'الاسم غير محدد' : displayName),
+                  subtitle: Text(user.email ?? ''),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () async {
+                    try {
+                      final updated =
+                          await UserProfileService.changeDisplayName(context); // ← تعديله هنا
+                      if (updated) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('تم تحديث الاسم')),
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('فشل التحديث: $e')),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+
+          // 🔐 تسجيل الخروج (اختياري)
+          if (user != null)
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('تسجيل الخروج'),
+              onTap: () async {
+                await GoogleAuthService.signOut();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تم تسجيل الخروج')),
+                );
+              },
+            ),
+
+          const Divider(height: 24),
+
           // 🌙 الوضع الداكن
           SwitchListTile(
             secondary: const Icon(Icons.dark_mode),
