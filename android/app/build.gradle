@@ -15,11 +15,11 @@ if (keystoreFile.exists()) {
 }
 
 android {
-    namespace "com.turki.sports"
+    namespace "com.turki.today_smart"
     compileSdkVersion 36
 
     defaultConfig {
-        applicationId "com.turki.sports"
+        applicationId "com.turki.today_smart"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
 
