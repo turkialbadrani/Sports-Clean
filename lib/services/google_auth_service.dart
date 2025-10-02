@@ -1,71 +1,117 @@
 // lib/services/google_auth_service.dart
-// Google Sign-In (iOS) + Firebase Auth — بدون serverClientId لتفادي invalid_audience.
-// يعتمد فقط على iOS CLIENT_ID الموجود في GoogleService-Info.plist.
+// Google Sign-In + Firebase Auth
+// - Android: بدون clientId.
+// - iOS: نمرّر iOS clientId فقط.
+// - تسجيل صامت متاح.
+// - تهيئة Firebase عند الحاجة.
+// - واجهات الاستخدام تكون "static" فقط:
+//     GoogleAuthService.signInSilentlyIfPossible();
+//     GoogleAuthService.signInWithGoogle();
+//     GoogleAuthService.signOut();
+
+import 'dart:io' show Platform;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../firebase_options.dart';
+
 class GoogleAuthService {
-  // iOS client ID from GoogleService-Info.plist
-  static const String _iosClientId = '253711866652-klmpti7fuf6puv31smpabeoc40uh6ljn.apps.googleusercontent.com';
+  GoogleAuthService._internal() {
+    // نهيّئ GoogleSignIn مرّة واحدة حسب المنصّة (بدون const)
+    _googleSignIn = Platform.isIOS
+        ? GoogleSignIn(
+            clientId: _iosClientId,
+            scopes: const ['email', 'openid', 'profile'],
+          )
+        : GoogleSignIn(
+            scopes: const ['email', 'openid', 'profile'],
+          );
+  }
 
-  // GoogleSignIn مهيأة لـ iOS فقط
-  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId: _iosClientId,
-    scopes: const ['email', 'openid', 'profile'],
-  );
+  static final GoogleAuthService instance = GoogleAuthService._internal();
 
-  /// تسجيل دخول تفاعلي (يعرض اختيار الحساب)
-  static Future<UserCredential> signInWithGoogle() async {
+  // iOS client ID (من GoogleService-Info.plist)
+  static const String _iosClientId =
+      '253711866652-klmpti7fuf6puv31smpabeoc40uh6ljn.apps.googleusercontent.com';
+
+  late final GoogleSignIn _googleSignIn;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // ===================== PRIVATE instance API =====================
+  // نخليها خاصة عشان ما تتعارض مع الواجهات الستاتيكية بنفس الأسماء.
+
+  Future<User?> _signInSilentlyIfPossible() async {
     await _ensureFirebase();
-    final account = await _googleSignIn.signIn();
-    if (account == null) throw Exception('تم إلغاء تسجيل الدخول.');
-    final auth = await account.authentication;
+
+    if (_auth.currentUser != null) return _auth.currentUser;
+
+    final GoogleSignInAccount? acc = await _googleSignIn.signInSilently();
+    if (acc == null) return null;
+
+    final GoogleSignInAuthentication gAuth = await acc.authentication;
     final credential = GoogleAuthProvider.credential(
-      idToken: auth.idToken,
-      accessToken: auth.accessToken,
+      accessToken: gAuth.accessToken,
+      idToken: gAuth.idToken,
     );
-    return FirebaseAuth.instance.signInWithCredential(credential);
+
+    final cred = await _auth.signInWithCredential(credential);
+    return cred.user;
   }
 
-  /// تسجيل صامت (بدون UI) إذا سبق وسجل المستخدم
-  static Future<UserCredential?> signInSilently() async {
+  Future<UserCredential> _signInWithGoogle() async {
     await _ensureFirebase();
-    final account = await _googleSignIn.signInSilently();
-    if (account == null) return null;
-    final auth = await account.authentication;
+
+    final GoogleSignInAccount? acc = await _googleSignIn.signIn();
+    if (acc == null) {
+      throw Exception('Sign-in cancelled.');
+    }
+
+    final GoogleSignInAuthentication gAuth = await acc.authentication;
     final credential = GoogleAuthProvider.credential(
-      idToken: auth.idToken,
-      accessToken: auth.accessToken,
+      accessToken: gAuth.accessToken,
+      idToken: gAuth.idToken,
     );
-    return FirebaseAuth.instance.signInWithCredential(credential);
+
+    return await _auth.signInWithCredential(credential);
   }
 
-  /// هل المستخدم مسجل دخول في FirebaseAuth ؟
-  static bool get isFirebaseSignedIn => FirebaseAuth.instance.currentUser != null;
-
-  /// هل فيه جلسة Google على الجهاز (قديمة)؟
-  static Future<bool> isGoogleSignedIn() => _googleSignIn.isSignedIn();
-
-  /// المستخدم الحالي (من Firebase)
-  static User? get currentUser => FirebaseAuth.instance.currentUser;
-
-  /// الخروج
-  static Future<void> signOut() async {
-    await FirebaseAuth.instance.signOut();
-    await _googleSignIn.signOut();
-  }
-
-  /// ستريم تغيّر حالة الدخول
-  static Stream<User?> get onAuthChanges => FirebaseAuth.instance.authStateChanges();
-
-  static Future<void> _ensureFirebase() async {
+  Future<void> _signOut() async {
     try {
-      // إذا ما هو مهيأ، هيئه
-      Firebase.apps;
-    } catch (_) {
-      await Firebase.initializeApp();
+      await _googleSignIn.signOut();
+    } finally {
+      await _auth.signOut();
     }
   }
+
+  Stream<User?> get _onAuthChanges => _auth.authStateChanges();
+  User? get _currentUser => _auth.currentUser;
+
+  // تهيئة Firebase لو ما تهيّأ (مع تجاوز duplicate-app)
+  Future<void> _ensureFirebase() async {
+    if (Firebase.apps.isEmpty) {
+      try {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      } on FirebaseException catch (e) {
+        if (e.code != 'duplicate-app') rethrow;
+      }
+    }
+  }
+
+  // ===================== PUBLIC static API =====================
+  // هذه فقط اللي نستخدمها بباقي المشروع.
+
+  static Future<User?> signInSilentlyIfPossible() =>
+      instance._signInSilentlyIfPossible();
+
+  static Future<UserCredential> signInWithGoogle() =>
+      instance._signInWithGoogle();
+
+  static Future<void> signOut() => instance._signOut();
+
+  static Stream<User?> get onAuthChangesStream => instance._onAuthChanges;
+  static User? get currentUserStatic => instance._currentUser;
 }

@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // ← جديد
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
@@ -47,145 +47,168 @@ import 'core/json_to_hive/players_repository.dart' as local_players;
 import 'features/localization/localization_ar.dart';
 import 'features/localization/ar_names.dart';
 
-// Google Sign-In Service (جديد)
+// Google Sign-In Service
 import 'services/google_auth_service.dart';
 
 /// ===== FCM background handler =====
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    } on FirebaseException catch (e) {
+      if (e.code != 'duplicate-app') rethrow;
+    }
   }
   try {
-    // TODO: تعامل مع الرسالة إن احتجت
+    // TODO: handle background message if needed
   } catch (e, st) {
     await FirebaseCrashlytics.instance.recordError(e, st, reason: 'BG message handler');
+  }
+}
+
+/// ===== Heavy work deferred after first frame =====
+Future<void> initHeavyStuff() async {
+  // Intl / Arabic locale
+  await initializeDateFormatting('ar', null);
+  Intl.defaultLocale = 'ar';
+  await LocalizationAr.load();
+  await initArLocalization();
+
+  // Hive
+  await Hive.initFlutter();
+  // Open boxes (consider lazy opening later if needed)
+  await Future.wait([
+    Hive.openBox('top_scorers'),
+    Hive.openBox('user_prefs'),
+    Hive.openBox('players_cache'),
+  ]);
+
+  // Preload local JSON (optional to split later)
+  try {
+    await local_leagues.LeaguesRepository().loadLeagues();
+    await ClubsRepository().loadClubs();
+    await local_players.PlayersRepository().loadPlayers();
+  } catch (e, st) {
+    debugPrint('Local JSON preload failed: $e');
+    await FirebaseCrashlytics.instance
+        .recordError(e, st, reason: 'Local JSON preload failed');
+  }
+
+  // FCM token (not required at boot)
+  try {
+    final box = Hive.box('user_prefs');
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token != null) await box.put('fcm_token', token);
+    FirebaseMessaging.instance.onTokenRefresh.listen((t) async => box.put('fcm_token', t));
+  } catch (e, st) {
+    debugPrint('FCM token handling failed: $e');
+    await FirebaseCrashlytics.instance
+        .recordError(e, st, reason: 'FCM token handling failed');
+  }
+
+  // 🔐 محاولة تسجيل صامت (بدون UI) — تمنع تكرار طلب تسجيل الدخول
+  try {
+    await GoogleAuthService.signInSilentlyIfPossible(); // ✅ ستاتيكي
+  } catch (_) {
+    // نتجاهل؛ AuthGate بيعرض زر الدخول لو ما فيه جلسة
   }
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Firebase أول شيء
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Firebase init (safe against duplicate + hot-restart)
+  if (Firebase.apps.isEmpty) {
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    } on FirebaseException catch (e) {
+      if (e.code != 'duplicate-app') rethrow;
+    }
+  }
 
-  // Boot screen
+  // Hook background handler once on boot
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Crashlytics handlers
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+
+  // Show lightweight boot screen immediately
   runApp(const _BootApp());
 
-  try {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-    // Crashlytics handlers
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
-
-    // Hive boxes
-    await Hive.initFlutter();
-    await Future.wait([
-      Hive.openBox('top_scorers'),
-      Hive.openBox('user_prefs'),
-      Hive.openBox('players_cache'),
-    ]);
-
-    // Env
-    final apiKey = AppConfig.apiKey;
-    final hasApiKey = (apiKey != null && apiKey.trim().isNotEmpty);
-
-    // Intl
-    await initializeDateFormatting('ar', null);
-    Intl.defaultLocale = 'ar';
-    await LocalizationAr.load();
-    await initArLocalization();
-
-    // Local JSON preload (safe)
+  // Defer heavy work to after first frame to avoid long jank at startup
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     try {
-      await local_leagues.LeaguesRepository().loadLeagues();
-      await ClubsRepository().loadClubs();
-      await local_players.PlayersRepository().loadPlayers();
-    } catch (e, st) {
-      debugPrint('Local JSON preload failed: $e');
-      await FirebaseCrashlytics.instance
-          .recordError(e, st, reason: 'Local JSON preload failed');
-    }
+      await initHeavyStuff();
 
-    // Settings + providers
-    final settingsProvider = SettingsProvider();
-    await settingsProvider.loadPreferences();
-    final mergedLeagues = <int>{
-      ...settingsProvider.preferredLeagues,
-      ...preferredLeagueIdsFromAssets(),
-    }.toList();
+      // Settings + providers AFTER heavy init
+      final settingsProvider = SettingsProvider();
+      await settingsProvider.loadPreferences();
+      final mergedLeagues = <int>{
+        ...settingsProvider.preferredLeagues,
+        ...preferredLeagueIdsFromAssets(),
+      }.toList();
 
-    // ApiClient
-    ApiClient makeClient() => ApiClient(
-          apiKey: hasApiKey ? apiKey! : '',
-          timezone: "Asia/Riyadh",
-          leagues: mergedLeagues,
-        );
+      ApiClient makeClient() => ApiClient(
+            apiKey: (AppConfig.apiKey ?? '').trim(),
+            timezone: "Asia/Riyadh",
+            leagues: mergedLeagues,
+          );
 
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => DirectoryProvider()),
-          ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
-          Provider<List<int>>.value(value: mergedLeagues),
-          ProxyProvider<List<int>, LeaguesRepository>(
-            update: (_, leagues, __) => LeaguesRepository(makeClient()),
-          ),
-          ProxyProvider<List<int>, api_players.PlayersRepository>(
-            update: (_, leagues, __) => api_players.PlayersRepository(makeClient()),
-          ),
-          ProxyProvider<List<int>, FixturesRepository>(
-            update: (_, leagues, __) => FixturesRepository(allowedLeagues: leagues),
-          ),
-          ProxyProvider<List<int>, StandingsRepository>(
-            update: (_, leagues, __) => StandingsRepository(
-              apiClient: makeClient(),
-              allowedLeagues: leagues,
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => DirectoryProvider()),
+            ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+            Provider<List<int>>.value(value: mergedLeagues),
+            ProxyProvider<List<int>, LeaguesRepository>(
+              update: (_, leagues, __) => LeaguesRepository(makeClient()),
             ),
-          ),
-          ProxyProvider3<LeaguesRepository, api_players.PlayersRepository, List<int>, FootballDirectory>(
-            update: (_, leaguesRepo, playersRepo, leagues, __) => FootballDirectory(
-              leaguesRepo: leaguesRepo,
-              playersRepo: playersRepo,
-              allowedLeagues: leagues,
+            ProxyProvider<List<int>, api_players.PlayersRepository>(
+              update: (_, leagues, __) => api_players.PlayersRepository(makeClient()),
             ),
-          ),
-          ChangeNotifierProvider(create: (_) => LeaguesProvider()),
-          ChangeNotifierProvider(
-            create: (ctx) => PlayersProvider(ctx.read<api_players.PlayersRepository>()),
-          ),
-          ChangeNotifierProvider(
-            create: (ctx) => FixturesProvider(ctx.read<FixturesRepository>()),
-          ),
-          ChangeNotifierProvider(
-            create: (ctx) => StandingsProvider(ctx.read<StandingsRepository>()),
-          ),
-          ChangeNotifierProvider(create: (_) => ChatProvider()),
-        ],
-        child: MyApp(hasApiKey: hasApiKey),
-      ),
-    );
-
-    // FCM token handling
-    try {
-      final box = Hive.box('user_prefs');
-      String? token = await FirebaseMessaging.instance.getToken();
-      if (token != null) await box.put('fcm_token', token);
-      FirebaseMessaging.instance.onTokenRefresh.listen((t) async => box.put('fcm_token', t));
+            ProxyProvider<List<int>, FixturesRepository>(
+              update: (_, leagues, __) => FixturesRepository(allowedLeagues: leagues),
+            ),
+            ProxyProvider<List<int>, StandingsRepository>(
+              update: (_, leagues, __) => StandingsRepository(
+                apiClient: makeClient(),
+                allowedLeagues: leagues,
+              ),
+            ),
+            ProxyProvider3<LeaguesRepository, api_players.PlayersRepository, List<int>, FootballDirectory>(
+              update: (_, leaguesRepo, playersRepo, leagues, __) => FootballDirectory(
+                leaguesRepo: leaguesRepo,
+                playersRepo: playersRepo,
+                allowedLeagues: leagues,
+              ),
+            ),
+            ChangeNotifierProvider(create: (_) => LeaguesProvider()),
+            ChangeNotifierProvider(
+              create: (ctx) => PlayersProvider(ctx.read<api_players.PlayersRepository>()),
+            ),
+            ChangeNotifierProvider(
+              create: (ctx) => FixturesProvider(ctx.read<FixturesRepository>()),
+            ),
+            ChangeNotifierProvider(
+              create: (ctx) => StandingsProvider(ctx.read<StandingsRepository>()),
+            ),
+            ChangeNotifierProvider(create: (_) => ChatProvider()),
+          ],
+          child: MyApp(hasApiKey: (AppConfig.apiKey ?? '').trim().isNotEmpty),
+        ),
+      );
     } catch (e, st) {
-      debugPrint('FCM token handling failed: $e');
       await FirebaseCrashlytics.instance
-          .recordError(e, st, reason: 'FCM token handling failed');
+          .recordError(e, st, fatal: true, reason: 'DEFERRED INIT ERROR');
+      runApp(_BootErrorApp(error: e.toString()));
     }
-  } catch (e, st) {
-    await FirebaseCrashlytics.instance.recordError(e, st, fatal: true, reason: 'BOOT ERROR');
-    runApp(_BootErrorApp(error: e.toString()));
-  }
+  });
 }
 
 class _BootApp extends StatelessWidget {
@@ -213,7 +236,7 @@ class _BootErrorApp extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(24),
             child: Text(
-              'تعذّر تشغيل التطبيق:\n$error',
+              'App failed to start.\n$error',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.red),
             ),
@@ -232,7 +255,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
 
-    // إذا ما فيه API_KEY نلتزم بسكرينك القديمة
     if (!hasApiKey) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -240,7 +262,6 @@ class MyApp extends StatelessWidget {
       );
     }
 
-    // إذا فيه API_KEY نضيف بوابة المصادقة
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Today Smart',
@@ -258,7 +279,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// بوابة مصادقة: إذا المستخدم مسجل يدخل على الواجهة، وإلا يطلع زر Google
+/// Auth gate: if user is signed-in go to child, else show Google sign-in
 class AuthGate extends StatelessWidget {
   final Widget child;
   const AuthGate({super.key, required this.child});
@@ -292,11 +313,13 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _loading = true);
     try {
-      await GoogleAuthService.signInWithGoogle();
+      await GoogleAuthService.signInWithGoogle(); // ✅ ستاتيكي
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل تسجيل الدخول: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sign-in failed: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -311,7 +334,7 @@ class _SignInScreenState extends State<SignInScreen> {
             : ElevatedButton.icon(
                 onPressed: _handleGoogleSignIn,
                 icon: const Icon(Icons.login),
-                label: const Text('تسجيل الدخول بواسطة Google'),
+                label: const Text('Sign in with Google'),
               ),
       ),
     );
@@ -328,7 +351,8 @@ class _NoApiKeyScreen extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(24),
           child: Text(
-            '⚠️ مفقود API_KEY في ملف .env\nأضِف API_KEY=XXXX ثم أعد تشغيل التطبيق.',
+            // ASCII-only message to avoid encoding issues
+            'API_KEY is missing in .env. Add API_KEY=XXXX, then restart the app.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16),
           ),
